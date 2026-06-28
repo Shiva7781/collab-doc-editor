@@ -1,14 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Plus, Search, FileText, Loader2, X, LayoutGrid, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SortableDocumentCard } from "@/components/documents/SortableDocumentCard";
 import { DocumentCard } from "@/components/documents/DocumentCard";
 import { useDocuments } from "@/hooks/useDocument";
 import { useSyncEngine } from "@/hooks/useSyncEngine";
 import { toast } from "sonner";
+import type { DocumentMeta } from "@/types";
+
+const ORDER_KEY = "collab-doc-order";
+
+function loadOrder(): string[] {
+  try { return JSON.parse(localStorage.getItem(ORDER_KEY) ?? "[]"); } catch { return []; }
+}
+function saveOrder(ids: string[]) {
+  try { localStorage.setItem(ORDER_KEY, JSON.stringify(ids)); } catch { /* ignore */ }
+}
 
 export default function DocumentsPage() {
   const { documents, loading, createDocument, deleteDocument } = useDocuments();
@@ -18,17 +44,52 @@ export default function DocumentsPage() {
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [ordered, setOrdered] = useState<DocumentMeta[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
 
+  // Merge fetched docs with persisted order
+  useEffect(() => {
+    if (!documents.length) { setOrdered(documents); return; }
+    const saved = loadOrder();
+    if (!saved.length) { setOrdered(documents); return; }
+    const map = new Map(documents.map((d) => [d.id, d]));
+    const reordered = saved.flatMap((id) => (map.has(id) ? [map.get(id)!] : []));
+    const newDocs = documents.filter((d) => !saved.includes(d.id));
+    setOrdered([...reordered, ...newDocs]);
+  }, [documents]);
+
   const filtered = search
-    ? documents.filter((d) =>
+    ? ordered.filter((d) =>
         d.title.toLowerCase().includes(search.toLowerCase()) ||
         d.ownerName.toLowerCase().includes(search.toLowerCase())
       )
-    : documents;
+    : ordered;
 
   const totalWords = documents.reduce((sum, d) => sum + (d.wordCount ?? 0), 0);
+
+  const handleDragStart = useCallback((e: DragStartEvent) => {
+    setActiveId(e.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback((e: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    setOrdered((prev) => {
+      const oldIdx = prev.findIndex((d) => d.id === active.id);
+      const newIdx = prev.findIndex((d) => d.id === over.id);
+      const next = arrayMove(prev, oldIdx, newIdx);
+      saveOrder(next.map((d) => d.id));
+      return next;
+    });
+    toast.success("Order saved");
+  }, []);
 
   async function handleCreate() {
     if (!newTitle.trim()) return;
@@ -176,11 +237,38 @@ export default function DocumentsPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map((doc, i) => (
-              <DocumentCard key={doc.id} document={doc} onDelete={deleteDocument} index={i} />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={filtered.map((d) => d.id)} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filtered.map((doc, i) => (
+                  <SortableDocumentCard
+                    key={doc.id}
+                    document={doc}
+                    onDelete={deleteDocument}
+                    index={i}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+
+            {/* Drag overlay — ghost card while dragging */}
+            <DragOverlay>
+              {activeId ? (
+                <div className="rotate-2 scale-105 opacity-90 shadow-2xl rounded-2xl">
+                  <DocumentCard
+                    document={ordered.find((d) => d.id === activeId)!}
+                    onDelete={() => {}}
+                    index={0}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
       </main>
 

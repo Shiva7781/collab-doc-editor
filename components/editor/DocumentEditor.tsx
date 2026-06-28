@@ -13,7 +13,7 @@
  * regardless of the order updates arrive. No manual merging needed.
  */
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, DragEvent } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
@@ -70,6 +70,7 @@ export function DocumentEditor({
   const [awarenessUsers, setAwarenessUsers] = useState<AwarenessState[]>([]);
   const [localSynced, setLocalSynced] = useState(false); // IndexedDB loaded
   const [title, setTitle] = useState(initialTitle);
+  const [isDragOver, setIsDragOver] = useState(false);
   const titleDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isReadOnly = myRole === "viewer";
 
@@ -198,6 +199,49 @@ export function DocumentEditor({
     [onTitleChange]
   );
 
+  // ─── Image / file drag-and-drop into editor ────────────────────────────────
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
+    if (isReadOnly) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragOver(true);
+  }, [isReadOnly]);
+
+  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
+    // Only clear when leaving the outer container (not child elements)
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      if (isReadOnly || !editor) return;
+
+      const files = Array.from(e.dataTransfer.files);
+      const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+
+      if (imageFiles.length === 0) return;
+
+      imageFiles.forEach((file) => {
+        if (file.size > 5 * 1024 * 1024) {
+          // 5 MB hard cap — keeps Y.js state reasonable
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const src = ev.target?.result as string;
+          if (!src) return;
+          editor.chain().focus().setImage({ src, alt: file.name }).run();
+        };
+        reader.readAsDataURL(file);
+      });
+    },
+    [editor, isReadOnly]
+  );
+
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
@@ -237,8 +281,29 @@ export function DocumentEditor({
         )}
       </div>
 
-      {/* Editor content area */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Editor content area with drag-and-drop zone */}
+      <div
+        className="flex-1 overflow-y-auto relative"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {/* Drop overlay */}
+        {isDragOver && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+            <div className="absolute inset-4 border-2 border-dashed border-blue-400 rounded-2xl bg-blue-50/80 backdrop-blur-sm" />
+            <div className="relative flex flex-col items-center gap-2 text-blue-600">
+              <div className="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+                </svg>
+              </div>
+              <p className="font-semibold text-base">Drop image to insert</p>
+              <p className="text-sm text-blue-500">PNG, JPG, GIF, WebP — max 5 MB</p>
+            </div>
+          </div>
+        )}
+
         <div className="max-w-5xl mx-auto">
           {!localSynced ? (
             <div className="flex items-center justify-center h-64 text-muted-foreground">
