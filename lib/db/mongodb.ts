@@ -23,10 +23,17 @@ export async function connectDB(): Promise<typeof mongoose> {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(uri, {
-      bufferCommands: false,
-      maxPoolSize: 10,
-    });
+    cached.promise = mongoose
+      .connect(uri, {
+        bufferCommands: false,
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 10000,
+      })
+      .catch((err) => {
+        cached.promise = null; // reset so next request retries
+        throw err;
+      });
   }
 
   cached.conn = await cached.promise;
