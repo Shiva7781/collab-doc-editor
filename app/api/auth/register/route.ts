@@ -58,7 +58,11 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (err) {
-    console.error("Register error:", err);
+    const e = err as Error & { code?: string; reason?: unknown };
+    console.error("Register error name:", e?.constructor?.name);
+    console.error("Register error message:", e?.message);
+    console.error("Register error code:", e?.code);
+    console.error("Register error reason:", JSON.stringify(e?.reason)?.substring(0, 500));
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
