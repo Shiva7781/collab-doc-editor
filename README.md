@@ -2,7 +2,11 @@
 
 A local-first, real-time collaborative document editor with offline support, deterministic conflict resolution, granular version control, and role-based access — built for the House of Edtech Full-Stack Developer Assignment v2.1.
 
-**Live:** [https://collab-doc-editor-rho.vercel.app](https://collab-doc-editor-rho.vercel.app)
+| | |
+|---|---|
+| **App (Vercel)** | [https://collab-doc-editor-rho.vercel.app](https://collab-doc-editor-rho.vercel.app) |
+| **WS Server (Railway)** | `wss://collab-doc-editor-ws-production.up.railway.app` |
+| **GitHub** | [https://github.com/Shiva7781/collab-doc-editor](https://github.com/Shiva7781/collab-doc-editor) |
 
 ---
 
@@ -210,33 +214,64 @@ Y.js uses the **YATA algorithm** — a CRDT where concurrent inserts at the same
 
 ## Deployment
 
-### Vercel (Next.js app)
+This project runs as two separate services:
+
+| Service | Platform | URL |
+|---|---|---|
+| Next.js app | Vercel | [https://collab-doc-editor-rho.vercel.app](https://collab-doc-editor-rho.vercel.app) |
+| WebSocket server | Railway | `wss://collab-doc-editor-ws-production.up.railway.app` |
+
+### Next.js → Vercel
 
 ```bash
 npm run build          # verify build passes locally first
 npx vercel --prod
 ```
 
-Set all environment variables in the Vercel dashboard under **Settings → Environment Variables**.
+Set all environment variables in the Vercel dashboard under **Settings → Environment Variables**. The key one is `NEXT_PUBLIC_WS_URL` — point it to your Railway WS server URL.
 
-> **Note:** The WebSocket server (`server.ts`) is a persistent Node.js process and cannot run on Vercel serverless. Deploy it separately on [Railway](https://railway.app), [Render](https://render.com), or a VPS, then update `NEXT_PUBLIC_WS_URL` to point to it. The app falls back to HTTP sync automatically when WebSocket is unavailable.
+### WebSocket server → Railway
 
-### Production (VPS / Railway)
+The WS server (`ws-server.ts`) is a persistent Node.js process — it cannot run on Vercel serverless.
 
 ```bash
-npm run build
-NODE_ENV=production npm start
+# Install Railway CLI
+npm install -g @railway/cli
+
+# Login and deploy
+railway login
+railway link            # select your project
+railway up --service collab-doc-editor-ws
 ```
+
+Set these env vars in the Railway dashboard:
+
+| Variable | Value |
+|---|---|
+| `MONGODB_URI` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | Must match the same value set on Vercel |
+| `NODE_ENV` | `production` |
 
 ---
 
 ## CI/CD
 
-GitHub Actions at `.github/workflows/ci.yml` runs on every push:
+GitHub Actions at `.github/workflows/ci.yml` runs on every push to `main` and on pull requests.
 
-1. **Lint & type-check** — `next lint` + `tsc --noEmit`
-2. **Build** — `next build`
-3. **Deploy** — on push to `main`
+**Pipeline:**
+1. **Lint & type-check** — `tsc --noEmit` + `next lint`
+2. **Build** — `next build` (production build verification)
+3. **Deploy to Vercel** — pushes to `main` auto-deploy the Next.js app
+4. **Deploy to Railway** — pushes to `main` auto-deploy the WebSocket server
+
+**Required GitHub secrets** (Settings → Secrets → Actions):
+
+| Secret | Where to get it |
+|---|---|
+| `VERCEL_TOKEN` | Vercel dashboard → Account Settings → Tokens |
+| `VERCEL_ORG_ID` | `team_lYIuz0fTzY9ON7c1XHHjFO80` |
+| `VERCEL_PROJECT_ID` | `prj_wifb3NC1AZB589ClN6IKNRPGYMeA` |
+| `RAILWAY_TOKEN` | Railway dashboard → Account Settings → Tokens |
 
 ---
 
