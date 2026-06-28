@@ -74,9 +74,6 @@ jobs:
     environment:
       name: production
       url: https://collab-doc-editor-rho.vercel.app
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -90,7 +87,17 @@ jobs:
         run: npm install -g vercel@latest
 
       - name: Deploy to Vercel (production)
-        run: vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::warning::VERCEL_TOKEN secret not set. Add it at:"
+            echo "::warning::https://github.com/Shiva7781/collab-doc-editor/settings/secrets/actions"
+            exit 0
+          fi
+          vercel --prod --yes --token="$VERCEL_TOKEN"
 
   # ── 4. Deploy WS Server → Railway ──────────────────────────────────────────
   deploy-railway:
@@ -105,6 +112,12 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway up --service collab-doc-editor-ws --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::warning::RAILWAY_TOKEN secret not set. Add it at:"
+            echo "::warning::https://github.com/Shiva7781/collab-doc-editor/settings/secrets/actions"
+            exit 0
+          fi
+          railway up --service collab-doc-editor-ws --detach
