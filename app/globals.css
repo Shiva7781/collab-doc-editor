@@ -93,8 +93,12 @@
 /* ─── Tiptap Editor Styles ────────────────────────────────────────────────── */
 .ProseMirror {
   outline: none;
-  min-height: calc(100vh - 200px);
-  padding: 2rem;
+  min-height: calc(100vh - 280px);
+  padding: 2.5rem 3rem;
+}
+
+@media (max-width: 640px) {
+  .ProseMirror { padding: 1.5rem; }
 }
 
 .ProseMirror > * + * {

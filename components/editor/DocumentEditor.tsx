@@ -304,7 +304,7 @@ export function DocumentEditor({
           </div>
         )}
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 py-8">
           {!localSynced ? (
             <div className="flex items-center justify-center h-64 text-muted-foreground">
               <div className="text-center space-y-2">
@@ -313,12 +313,14 @@ export function DocumentEditor({
               </div>
             </div>
           ) : (
-            <EditorContent
-              editor={editor}
-              className="min-h-screen"
-              aria-label="Document content"
-              aria-readonly={isReadOnly}
-            />
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-lg shadow-slate-200/60 overflow-hidden min-h-[calc(100vh-260px)]">
+              <EditorContent
+                editor={editor}
+                className=""
+                aria-label="Document content"
+                aria-readonly={isReadOnly}
+              />
+            </div>
           )}
         </div>
       </div>
