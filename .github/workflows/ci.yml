@@ -120,4 +120,8 @@ jobs:
             echo "::warning::https://github.com/Shiva7781/collab-doc-editor/settings/secrets/actions"
             exit 0
           fi
-          railway up --service collab-doc-editor-ws --detach
+          railway up \
+            --project 500afb2d-625a-4db8-9915-8f8b23325038 \
+            --service collab-doc-editor-ws \
+            --environment production \
+            --detach
