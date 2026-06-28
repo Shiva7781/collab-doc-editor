@@ -64,6 +64,14 @@ async function getDocumentRole(docId: string, userId: string): Promise<string | 
 // Start HTTP + WS server immediately so Railway's health check can pass
 const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
 
+// Keep connections alive through Railway's load balancer (closes idle TCP after ~60s)
+const PING_INTERVAL_MS = 25_000;
+setInterval(() => {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) client.ping();
+  });
+}, PING_INTERVAL_MS);
+
 const httpServer = http.createServer((req, res) => {
   if (req.url === "/" || req.url === "/health") {
     res.writeHead(200, { "Content-Type": "text/plain" });
