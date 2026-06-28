@@ -35,7 +35,7 @@ export function Header({ showNewDoc, onNewDoc }: HeaderProps) {
     <>
       {!isOnline && <OfflineBanner />}
       <header
-        className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-sm"
+        className="sticky top-0 z-10 border-b border-border/60 bg-white/90 backdrop-blur-md shadow-sm"
         style={{ top: isOnline ? 0 : "30px" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
@@ -45,10 +45,10 @@ export function Header({ showNewDoc, onNewDoc }: HeaderProps) {
             className="flex items-center gap-2 font-bold text-lg hover:opacity-80 transition-opacity"
             aria-label="Go to documents"
           >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <FileText size={16} className="text-primary-foreground" />
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-violet-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-200">
+              <FileText size={15} className="text-white" />
             </div>
-            <span className="hidden sm:inline bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <span className="hidden sm:inline bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
               CollabDocs
             </span>
           </Link>
@@ -58,7 +58,7 @@ export function Header({ showNewDoc, onNewDoc }: HeaderProps) {
             {showNewDoc && onNewDoc && (
               <button
                 onClick={onNewDoc}
-                className="hidden sm:flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                className="hidden sm:flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg hover:opacity-90 transition-opacity shadow-sm shadow-blue-200"
                 aria-label="Create new document"
               >
                 <Plus size={14} />

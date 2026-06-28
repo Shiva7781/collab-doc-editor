@@ -81,7 +81,7 @@ export default function DocumentPage({ params }: PageProps) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Custom minimal header for editor */}
-      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-white/90 backdrop-blur-md shadow-sm">
         <div className="px-4 h-12 flex items-center justify-between gap-3">
           <Link
             href="/documents"
@@ -97,8 +97,8 @@ export default function DocumentPage({ params }: PageProps) {
               onClick={() => setShowVersions((v) => !v)}
               className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                 showVersions
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground"
+                  ? "bg-gradient-to-r from-blue-600 to-violet-600 text-white border-transparent"
+                  : "border-border hover:border-blue-300 text-muted-foreground hover:text-foreground"
               }`}
               aria-label="Version history"
               aria-expanded={showVersions}
@@ -108,7 +108,7 @@ export default function DocumentPage({ params }: PageProps) {
             </button>
             <button
               onClick={() => setShowShare(true)}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:opacity-90 transition-opacity shadow-sm shadow-blue-200"
               aria-label="Share document"
             >
               <Share2 size={13} />
