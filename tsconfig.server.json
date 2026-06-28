@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "outDir": ".server-build",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["server.ts"],
+  "exclude": ["node_modules"]
+}
