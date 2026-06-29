@@ -120,7 +120,7 @@ export function AIAssistant({ editor, documentId, onClose }: AIAssistantProps) {
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-purple-500" />
           <span className="font-medium text-sm">AI Writing Assistant</span>
-          <span className="text-xs text-muted-foreground">powered by Groq Llama</span>
+          <span className="hidden sm:inline text-xs text-muted-foreground">powered by Groq Llama</span>
         </div>
         <button
           onClick={onClose}

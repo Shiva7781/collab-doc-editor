@@ -110,7 +110,7 @@ export function DocumentCard({ document: doc, onDelete, index = 0 }: DocumentCar
         <div className="absolute top-4 right-3" ref={menuRef}>
           <button
             onClick={(e) => { e.preventDefault(); setMenuOpen((v) => !v); }}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors sm:opacity-0 sm:group-hover:opacity-100"
             aria-label="Document options"
             aria-expanded={menuOpen}
           >

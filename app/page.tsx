@@ -50,7 +50,7 @@ export default async function HomePage() {
               Local-First · CRDT Sync · Offline-Ready
             </div>
 
-            <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight">
               Write together,{" "}
               <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-pink-500 bg-clip-text text-transparent animate-shimmer">
@@ -162,7 +162,7 @@ export default async function HomePage() {
 
         {/* CTA Banner */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-24">
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-600 via-violet-600 to-purple-700 p-12 text-center text-white">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-600 via-violet-600 to-purple-700 p-6 sm:p-12 text-center text-white">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptNiA2djZoNnYtNmgtNnptLTYgMHY2aDZ2LTZoLTZ6TTI0IDI0djZoNnYtNmgtNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
             <div className="relative">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to collaborate?</h2>
