@@ -51,14 +51,14 @@ export function VersionHistoryPanel({ documentId, myRole, onClose, onRestored }:
       const json = await res.json();
       if (!json.success) throw new Error(json.error);
       setVersions((prev) => [json.data, ...prev]);
-      toast.success(`Snapshot "${newTitle}" saved`);
+      toast.success(`Snapshot "${newTitle}" saved`, { description: "You can restore it any time." });
       setNewTitle("");
       setNewDesc("");
       setShowCreate(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to save snapshot";
       setError(msg);
-      toast.error(msg);
+      toast.error(msg, { duration: 5000 });
     } finally {
       setCreating(false);
     }
@@ -66,6 +66,7 @@ export function VersionHistoryPanel({ documentId, myRole, onClose, onRestored }:
 
   async function restoreVersion(versionId: string, title: string) {
     toast(`Restore "${title}"?`, {
+      description: "This will overwrite the current content.",
       action: {
         label: "Restore",
         onClick: async () => {
@@ -77,13 +78,13 @@ export function VersionHistoryPanel({ documentId, myRole, onClose, onRestored }:
             });
             const json = await res.json();
             if (!json.success) throw new Error(json.error);
-            toast.success("Document restored successfully");
+            toast.success("Document restored", { description: "Content rolled back to this snapshot." });
             onRestored?.();
             onClose();
           } catch (err) {
             const msg = err instanceof Error ? err.message : "Restore failed";
             setError(msg);
-            toast.error(msg);
+            toast.error(msg, { duration: 5000 });
           } finally {
             setRestoring(null);
           }

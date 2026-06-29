@@ -88,7 +88,7 @@ export default function DocumentsPage() {
       saveOrder(next.map((d) => d.id));
       return next;
     });
-    toast.success("Order saved");
+    toast.success("Document order saved");
   }, []);
 
   async function handleCreate() {
@@ -99,7 +99,7 @@ export default function DocumentsPage() {
       toast.success(`"${newTitle.trim()}" created`);
       window.location.href = `/documents/${doc.id}`;
     } catch {
-      toast.error("Failed to create document");
+      toast.error("Failed to create document", { duration: 5000 });
     } finally {
       setCreating(false);
       setShowCreate(false);

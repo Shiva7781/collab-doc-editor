@@ -42,19 +42,19 @@ export default function RegisterPage() {
     const json = await res.json();
     if (!json.success) {
       setError(json.error ?? "Registration failed");
-      toast.error(json.error ?? "Registration failed");
+      toast.error(json.error ?? "Registration failed", { duration: 5000 });
       setLoading(false);
       return;
     }
     setSuccess(true);
-    toast.success("Account created! Signing you in…");
+    toast.success("Account created!", { description: "Signing you in…" });
     const signInRes = await signIn("credentials", { email: form.email, password: form.password, redirect: false });
     setLoading(false);
     if (signInRes?.ok) {
       router.push("/documents");
       router.refresh();
     } else {
-      toast.error("Auto sign-in failed. Please log in manually.");
+      toast.error("Auto sign-in failed", { description: "Please log in manually.", duration: 6000 });
       router.push("/login");
     }
   }

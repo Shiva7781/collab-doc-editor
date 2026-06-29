@@ -60,7 +60,7 @@ export function ShareDocumentDialog({ documentId, myRole, onClose }: ShareDocume
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to invite user";
       setError(msg);
-      toast.error(msg);
+      toast.error(msg, { duration: 5000 });
     } finally {
       setInviting(false);
     }
@@ -70,9 +70,9 @@ export function ShareDocumentDialog({ documentId, myRole, onClose }: ShareDocume
     try {
       await fetch(`/api/documents/${documentId}/collaborators?userId=${userId}`, { method: "DELETE" });
       setCollaborators((prev) => prev.filter((c) => c.userId !== userId));
-      toast.success(`Removed ${name}`);
+      toast.success(`Removed ${name}`, { description: "Collaborator access revoked." });
     } catch {
-      toast.error("Failed to remove collaborator");
+      toast.error("Failed to remove collaborator", { duration: 5000 });
     }
   }
 
@@ -88,7 +88,7 @@ export function ShareDocumentDialog({ documentId, myRole, onClose }: ShareDocume
       );
       toast.success(`${name} is now ${newRole === "editor" ? "an editor" : "a viewer"}`);
     } catch {
-      toast.error("Failed to update role");
+      toast.error("Failed to update role", { duration: 5000 });
     }
   }
 
