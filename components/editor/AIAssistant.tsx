@@ -78,11 +78,11 @@ export function AIAssistant({ editor, documentId, onClose }: AIAssistantProps) {
       const json = await res.json();
       if (!json.success) throw new Error(json.error ?? "AI request failed");
       setResult(json.data.result);
-      toast.success("AI response ready");
+      toast.success("AI response ready", { description: "Review and insert or copy below." });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to get AI response";
       setError(msg);
-      toast.error(msg);
+      toast.error(msg, { duration: 5000 });
     } finally {
       setLoading(false);
     }

@@ -50,9 +50,9 @@ export default function LoginPage() {
     setLoading(false);
     if (res?.error) {
       setError("Invalid email or password");
-      toast.error("Invalid email or password");
+      toast.error("Invalid email or password", { duration: 5000 });
     } else {
-      toast.success("Signed in successfully");
+      toast.success("Signed in successfully", { description: "Welcome back!" });
       router.push("/documents");
       router.refresh();
     }

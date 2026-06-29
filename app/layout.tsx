@@ -105,7 +105,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <SessionProvider>{children}</SessionProvider>
-        <Toaster position="bottom-right" richColors closeButton />
+        <Toaster
+          position="bottom-right"
+          richColors
+          closeButton
+          expand={false}
+          visibleToasts={4}
+          duration={4000}
+          gap={8}
+          offset={20}
+          toastOptions={{
+            classNames: {
+              toast: "!rounded-xl !shadow-lg !text-sm",
+              title: "!font-semibold",
+              description: "!text-xs !opacity-85",
+              closeButton: "!rounded-full",
+            },
+          }}
+        />
       </body>
     </html>
   );
