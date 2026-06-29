@@ -47,15 +47,25 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // Load current server state
     const serverDoc = await DocModel.findById(id).select("yjsState").lean();
+    if (!serverDoc) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
     const serverYDoc = new Y.Doc();
-    if (serverDoc?.yjsState) {
+    if (serverDoc.yjsState) {
       const sb = toBuffer(serverDoc.yjsState);
-      Y.applyUpdate(serverYDoc, new Uint8Array(sb.buffer, sb.byteOffset, sb.byteLength));
+      try {
+        Y.applyUpdate(serverYDoc, new Uint8Array(sb.buffer, sb.byteOffset, sb.byteLength));
+      } catch {
+        // Corrupted server state — start fresh rather than blocking the client
+        console.warn(`sync: corrupted yjsState for doc ${id}, resetting`);
+      }
     }
 
     // Apply client update (Y.js CRDT merge — always deterministic)
-    Y.applyUpdate(serverYDoc, new Uint8Array(clientUpdate));
+    try {
+      Y.applyUpdate(serverYDoc, new Uint8Array(clientUpdate));
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid Y.js update payload" }, { status: 400 });
+    }
 
     const mergedState = Y.encodeStateAsUpdate(serverYDoc);
     const mergedStateVector = Y.encodeStateVector(serverYDoc);
