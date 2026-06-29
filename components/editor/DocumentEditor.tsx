@@ -255,15 +255,17 @@ export function DocumentEditor({
             disabled={isReadOnly}
             placeholder="Untitled Document"
             className={[
-              "flex-1 text-xl font-semibold bg-transparent outline-none",
+              "flex-1 text-base sm:text-xl font-semibold bg-transparent outline-none",
               "placeholder:text-muted-foreground truncate",
               isReadOnly ? "cursor-default opacity-70" : "hover:bg-muted/50 rounded px-2 -mx-2 py-1",
             ].join(" ")}
             aria-label="Document title"
           />
 
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <CollaboratorPresence users={awarenessUsers} />
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="hidden sm:block">
+              <CollaboratorPresence users={awarenessUsers} />
+            </div>
             <SyncStatusIndicator status={syncStatus} />
             {isReadOnly && (
               <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">

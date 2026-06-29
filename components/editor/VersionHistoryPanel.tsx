@@ -94,7 +94,13 @@ export function VersionHistoryPanel({ documentId, myRole, onClose, onRestored }:
   }
 
   return (
-    <div className="fixed inset-y-0 right-0 w-80 bg-background border-l border-border shadow-xl z-30 flex flex-col animate-fade-in">
+    <>
+      <div
+        className="fixed inset-0 bg-black/50 z-[29] sm:hidden"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+    <div className="fixed inset-y-0 right-0 w-full sm:w-80 bg-background border-l border-border shadow-xl z-30 flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
@@ -224,5 +230,6 @@ export function VersionHistoryPanel({ documentId, myRole, onClose, onRestored }:
         )}
       </div>
     </div>
+    </>
   );
 }

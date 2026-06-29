@@ -113,7 +113,7 @@ export function ShareDocumentDialog({ documentId, myRole, onClose }: ShareDocume
           {isOwner && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Invite by email</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="flex-1 relative">
                   <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
@@ -125,22 +125,24 @@ export function ShareDocumentDialog({ documentId, myRole, onClose }: ShareDocume
                     onKeyDown={(e) => { if (e.key === "Enter") invite(); }}
                   />
                 </div>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as "editor" | "viewer")}
-                  className="text-sm border border-border rounded-lg px-2 py-2 bg-background outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="editor">Editor</option>
-                  <option value="viewer">Viewer</option>
-                </select>
-                <button
-                  onClick={invite}
-                  disabled={inviting || !email.trim()}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {inviting ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />}
-                  Invite
-                </button>
+                <div className="flex gap-2">
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as "editor" | "viewer")}
+                    className="flex-1 sm:flex-none text-sm border border-border rounded-lg px-2 py-2 bg-background outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="editor">Editor</option>
+                    <option value="viewer">Viewer</option>
+                  </select>
+                  <button
+                    onClick={invite}
+                    disabled={inviting || !email.trim()}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {inviting ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />}
+                    Invite
+                  </button>
+                </div>
               </div>
               {error && <p className="text-xs text-destructive">{error}</p>}
             </div>

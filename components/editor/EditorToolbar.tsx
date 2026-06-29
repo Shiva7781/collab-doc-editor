@@ -67,8 +67,9 @@ export function EditorToolbar({ editor, documentId }: EditorToolbarProps) {
 
   return (
     <>
+      <div className="overflow-x-auto scrollbar-none -mx-1 px-1">
       <div
-        className="flex items-center gap-0.5 flex-wrap"
+        className="flex items-center gap-0.5 min-w-max"
         role="toolbar"
         aria-label="Text formatting options"
       >
@@ -253,6 +254,7 @@ export function EditorToolbar({ editor, documentId }: EditorToolbarProps) {
         >
           <Sparkles size={iconSize} className="text-purple-500" />
         </ToolbarButton>
+      </div>
       </div>
 
       {aiOpen && (
