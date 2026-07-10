@@ -1,6 +1,8 @@
 # CollabDocs
 
-A local-first, real-time collaborative document editor with offline support, deterministic conflict resolution, granular version control, and role-based access — built for the House of Edtech Full-Stack Developer Assignment v2.1.
+A local-first, real-time collaborative document editor with offline support, deterministic conflict resolution, granular version control, and role-based access.
+
+<img width="1840" height="1002" alt="CollabDocs" src="https://github.com/user-attachments/assets/94971cbd-3627-433d-a726-8ecac3d409d7" />
 
 | | |
 |---|---|
@@ -64,7 +66,7 @@ Open `.env` and fill in the values:
 
 ```env
 # MongoDB — use Atlas URI for cloud, or localhost for local
-MONGODB_URI=mongodb://localhost:27017/HOE
+MONGODB_URI=mongodb://localhost:27017/collabdocs
 
 # NextAuth — generate with: openssl rand -base64 32
 NEXTAUTH_SECRET=your-32-char-secret-here
