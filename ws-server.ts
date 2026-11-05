@@ -107,6 +107,9 @@ async function handleConnection(ws: WebSocket, req: http.IncomingMessage) {
   const docId     = pathParts[1];
   const token     = parsed.query.token as string | undefined;
 
+  console.log(`[ws] connection doc=${docId ? "yes" : "no"} auth=${token ? "yes" : "no"} ready=${isReady}`);
+  ws.on("close", (code) => console.log(`[ws] closed code=${code}`));
+
   if (!docId || !token) { ws.close(4001, "Missing documentId or token"); return; }
 
   // Database not connected yet (cold start or outage): ask the client to retry
