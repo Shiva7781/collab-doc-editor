@@ -101,8 +101,6 @@ async function getDocumentRole(docId: string, userId: string): Promise<string | 
 }
 
 // ─── WebSocket connection handler ─────────────────────────────────────────────
-const REJECT_DELAY_MS = 100;
-
 async function handleConnection(ws: WebSocket, req: http.IncomingMessage) {
   const parsed    = url.parse(req.url ?? "", true);
   const pathParts = (parsed.pathname ?? "").split("/").filter(Boolean);
@@ -112,24 +110,17 @@ async function handleConnection(ws: WebSocket, req: http.IncomingMessage) {
   console.log(`[ws] connection doc=${docId ? "yes" : "no"} auth=${token ? "yes" : "no"} ready=${isReady}`);
   ws.on("close", (code) => console.log(`[ws] closed code=${code}`));
 
-  // Rejections are sent shortly after the handshake: some reverse proxies
-  // (e.g. Render's) drop frames that arrive in the same packet as the 101
-  // response, which left rejected clients hanging instead of seeing the code.
-  const reject = (code: number, reason: string) => {
-    setTimeout(() => ws.close(code, reason), REJECT_DELAY_MS);
-  };
-
-  if (!docId || !token) { reject(4001, "Missing documentId or token"); return; }
+  if (!docId || !token) { ws.close(4001, "Missing documentId or token"); return; }
 
   // Database not connected yet (cold start or outage): ask the client to retry
   // rather than wrongly reporting "no access". 1013 = Try Again Later.
-  if (!isReady) { reject(1013, "Server starting, retry shortly"); return; }
+  if (!isReady) { ws.close(1013, "Server starting, retry shortly"); return; }
 
   const user = await verifyToken(token);
-  if (!user) { reject(4003, "Invalid token"); return; }
+  if (!user) { ws.close(4003, "Invalid token"); return; }
 
   const role = await getDocumentRole(docId, user.userId);
-  if (!role) { reject(4004, "No access to this document"); return; }
+  if (!role) { ws.close(4004, "No access to this document"); return; }
 
   const room      = getRoom(docId);
   const { doc, awareness, clients } = room;
