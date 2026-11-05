@@ -1,0 +1,27 @@
+# Render Blueprint for the real-time WebSocket server (ws-server.ts).
+# The Next.js app itself is deployed on Vercel; only the persistent WS
+# process lives here, since it cannot run on Vercel's serverless runtime.
+services:
+  - type: web
+    name: collab-doc-editor-ws
+    runtime: node
+    plan: free
+    branch: main
+    # tsx is a devDependency; include dev deps so the start command can run it.
+    buildCommand: npm ci --include=dev
+    startCommand: node_modules/.bin/tsx ws-server.ts
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Same MongoDB connection string the Vercel app uses (database: HOE).
+      - key: MONGODB_URI
+        sync: false
+      # Must be identical to JWT_SECRET on Vercel, or every WS connection is rejected.
+      - key: JWT_SECRET
+        sync: false
+      - key: MAX_SYNC_PAYLOAD_BYTES
+        value: "5242880"

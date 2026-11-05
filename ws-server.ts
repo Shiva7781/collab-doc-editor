@@ -109,6 +109,10 @@ async function handleConnection(ws: WebSocket, req: http.IncomingMessage) {
 
   if (!docId || !token) { ws.close(4001, "Missing documentId or token"); return; }
 
+  // Database not connected yet (cold start or outage): ask the client to retry
+  // rather than wrongly reporting "no access". 1013 = Try Again Later.
+  if (!isReady) { ws.close(1013, "Server starting, retry shortly"); return; }
+
   const user = await verifyToken(token);
   if (!user) { ws.close(4003, "Invalid token"); return; }
 
@@ -247,7 +251,7 @@ let isReady = false;
 
 const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
 
-// Keepalive ping — Railway load balancer closes idle TCP after ~60 s
+// Keepalive ping — hosting load balancers (e.g. Render) close idle TCP connections
 const PING_INTERVAL_MS = 25_000;
 setInterval(() => {
   wss.clients.forEach((client) => {
@@ -283,11 +287,25 @@ httpServer.listen(PORT, "0.0.0.0", () => {
 });
 
 // ─── Init (DB + signal handling) ──────────────────────────────────────────────
+// Missing config is a deploy mistake, so fail fast. A database outage is not:
+// keep the port bound (so the platform health check passes) and keep retrying,
+// instead of exiting and crash-looping.
+const DB_RETRY_DELAY_MS = 10_000;
+
 async function init() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI env var is required");
   if (!JWT_SECRET)  throw new Error("JWT_SECRET env var is required");
 
-  await mongoose.connect(MONGODB_URI, { maxPoolSize: 5 });
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await mongoose.connect(MONGODB_URI, { maxPoolSize: 5, serverSelectionTimeoutMS: 10_000 });
+      break;
+    } catch (err) {
+      const e = err as Error & { code?: string };
+      console.error(`MongoDB connection attempt ${attempt} failed (${e.code ?? e.name}: ${e.message}); retrying in ${DB_RETRY_DELAY_MS / 1000}s`);
+      await new Promise((resolve) => setTimeout(resolve, DB_RETRY_DELAY_MS));
+    }
+  }
   console.log("✓ MongoDB connected");
 
   isReady = true;

@@ -7,7 +7,7 @@ A local-first, real-time collaborative document editor with offline support, det
 | | |
 |---|---|
 | **App (Vercel)** | [https://collab-doc-editor-rho.vercel.app](https://collab-doc-editor-rho.vercel.app) |
-| **WS Server (Railway)** | `wss://collab-doc-editor-ws-production.up.railway.app` |
+| **WS Server (Render)** | `wss://collab-doc-editor-ws.onrender.com` |
 | **GitHub** | [https://github.com/Shiva7781/collab-doc-editor](https://github.com/Shiva7781/collab-doc-editor) |
 
 ---
@@ -221,7 +221,7 @@ This project runs as two separate services:
 | Service | Platform | URL |
 |---|---|---|
 | Next.js app | Vercel | [https://collab-doc-editor-rho.vercel.app](https://collab-doc-editor-rho.vercel.app) |
-| WebSocket server | Railway | `wss://collab-doc-editor-ws-production.up.railway.app` |
+| WebSocket server | Render | `wss://collab-doc-editor-ws.onrender.com` |
 
 ### Next.js → Vercel
 
@@ -230,29 +230,22 @@ npm run build          # verify build passes locally first
 npx vercel --prod
 ```
 
-Set all environment variables in the Vercel dashboard under **Settings → Environment Variables**. The key one is `NEXT_PUBLIC_WS_URL` — point it to your Railway WS server URL.
+Set all environment variables in the Vercel dashboard under **Settings → Environment Variables**. The key one is `NEXT_PUBLIC_WS_URL` — point it to your Render WS server URL.
 
-### WebSocket server → Railway
+### WebSocket server → Render
 
-The WS server (`ws-server.ts`) is a persistent Node.js process — it cannot run on Vercel serverless.
+The WS server (`ws-server.ts`) is a persistent Node.js process — it cannot run on Vercel serverless. It is deployed on Render from the [`render.yaml`](render.yaml) Blueprint (Render dashboard → **New → Blueprint** → select this repo). Pushes to `main` redeploy it automatically.
 
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway link            # select your project
-railway up --service collab-doc-editor-ws
-```
-
-Set these env vars in the Railway dashboard:
+Set these env vars when Render asks for them:
 
 | Variable | Value |
 |---|---|
-| `MONGODB_URI` | Your MongoDB Atlas connection string |
+| `MONGODB_URI` | Your MongoDB Atlas connection string (same as Vercel) |
 | `JWT_SECRET` | Must match the same value set on Vercel |
-| `NODE_ENV` | `production` |
+
+`NODE_ENV`, `NODE_VERSION` and `MAX_SYNC_PAYLOAD_BYTES` are already set by the Blueprint.
+
+> On Render's free tier the server sleeps after ~15 minutes of inactivity. The first connection wakes it (~30–60 s); the editor keeps working offline meanwhile and syncs once the socket connects.
 
 ---
 
@@ -264,7 +257,7 @@ GitHub Actions at `.github/workflows/ci.yml` runs on every push to `main` and on
 1. **Lint & type-check** — `tsc --noEmit` + `next lint`
 2. **Build** — `next build` (production build verification)
 3. **Deploy to Vercel** — pushes to `main` auto-deploy the Next.js app
-4. **Deploy to Railway** — pushes to `main` auto-deploy the WebSocket server
+4. **Render** — pushes to `main` auto-deploy the WebSocket server (via `render.yaml`)
 
 **Required GitHub secrets** (Settings → Secrets → Actions):
 
@@ -273,7 +266,6 @@ GitHub Actions at `.github/workflows/ci.yml` runs on every push to `main` and on
 | `VERCEL_TOKEN` | Vercel dashboard → Account Settings → Tokens |
 | `VERCEL_ORG_ID` | `team_lYIuz0fTzY9ON7c1XHHjFO80` |
 | `VERCEL_PROJECT_ID` | `prj_wifb3NC1AZB589ClN6IKNRPGYMeA` |
-| `RAILWAY_TOKEN` | Railway dashboard → Account Settings → Tokens |
 
 ---
 
